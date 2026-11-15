@@ -7,8 +7,8 @@
 <title>Portfolio Construction | Tadeu Ferreira</title>
 <link rel="stylesheet" href="/style.css">
 
-<link rel="stylesheet" href="./frontier.css?v=asset-picker">
-<script src="./frontier.js?v=asset-picker" defer></script>
+<link rel="stylesheet" href="./frontier.css?v=horizon-overlay">
+<script src="./frontier.js?v=horizon-overlay" defer></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -73,6 +73,15 @@
 </div>
 </div>
 </div>
+<section class="horizon-section" aria-labelledby="horizon-title">
+<div class="chart-box">
+<div class="chart-head"><h2 id="horizon-title">Efficient frontiers by lookback</h2><span>ANNUALIZED RETURN (%)</span></div>
+<p class="chart-key" id="horizon-description">Fixed trailing windows ending in the latest month in the dataset. The curves update when you change the assets.</p>
+<canvas id="horizon-chart" role="img" aria-label="Efficient frontiers by lookback" aria-describedby="horizon-description horizon-status horizon-legend" hidden></canvas>
+<ul id="horizon-legend" class="horizon-legend" aria-label="Lookback periods"></ul>
+<p id="horizon-status" class="chart-key" aria-live="polite"></p>
+</div>
+</section>
 <details open><summary>How the model works</summary>
 <p><strong>Data.</strong> We use the last available adjusted close in each completed calendar month. Each monthly return is the current month-end close divided by the previous month-end close, minus one. The sample uses only months with returns for all selected assets. Source: Yahoo Finance, adjusted closes in USD. <a href="./monthly-returns.csv">Download monthly returns (CSV)</a>.</p>
 <p><strong>Example.</strong> The December 2004 return for VTI or GLD is its December month-end close divided by its November month-end close, minus one.</p>

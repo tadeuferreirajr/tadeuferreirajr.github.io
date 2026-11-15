@@ -108,12 +108,16 @@ function showAssetTooltip(event) {
   chart.style.cursor = "pointer";
 }
 
-function drawChart() {
-  assetMarkers = [];
-  hideAssetTooltip();
-  if (!visible) return;
-  const { frontier, assets, labels } = visible;
-  const chart = el("frontier-chart");
+const horizons = [
+  { years: 1, color: "#1b5e9b", dash: [] },
+  { years: 3, color: "#ad4d17", dash: [7, 3] },
+  { years: 5, color: "#187361", dash: [3, 3] },
+  { years: 10, color: "#75499b", dash: [9, 3, 2, 3] },
+];
+let previousHorizonAssets;
+let horizonCurves = [];
+
+function chartAxes(chart, points) {
   const width = chart.clientWidth;
   const height = chart.clientHeight;
   if (!width || !height) return;
@@ -123,7 +127,6 @@ function drawChart() {
   const ctx = chart.getContext("2d");
   ctx.scale(scale, scale);
   const left = 61, right = width - 23, top = 16, bottom = height - 38;
-  const points = frontier.concat(assets);
   const maxX = Math.max(0.01, ...points.map(p => p.risk)) * 1.10;
   const low = Math.min(...points.map(p => p.return));
   const high = Math.max(...points.map(p => p.return));
@@ -144,11 +147,90 @@ function drawChart() {
     ctx.fillText(percent(low - pad + (high - low + 2 * pad) * i / 4), 4, yp + 4);
   }
   ctx.fillText("Annualized volatility", left, height - 4);
-  ctx.strokeStyle = "#245d93";
+  return { ctx, x, y };
+}
+
+function strokeFrontier({ ctx, x, y }, frontier, color, dash) {
+  ctx.strokeStyle = color;
   ctx.lineWidth = 3;
+  ctx.setLineDash(dash);
   ctx.beginPath();
-  frontier.forEach((p, i) => i ? ctx.lineTo(x(p.risk), y(p.return)) : ctx.moveTo(x(p.risk), y(p.return)));
-  ctx.stroke();
+  if (frontier.length === 1) {
+    const point = frontier[0];
+    ctx.arc(x(point.risk), y(point.return), 4, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+  } else {
+    frontier.forEach((point, i) => i
+      ? ctx.lineTo(x(point.risk), y(point.return)) : ctx.moveTo(x(point.risk), y(point.return)));
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+}
+
+function trailingStart(last, years) {
+  const date = new Date(last + "-01T00:00:00Z");
+  date.setUTCMonth(date.getUTCMonth() - years * 12 + 1);
+  return date.toISOString().slice(0, 7);
+}
+
+function buildHorizonCurves(dataset, indices) {
+  const last = dataset.rows.at(-1)[0];
+  return horizons.map(horizon => {
+    const start = trailingStart(last, horizon.years);
+    const sample = dataset.rows.filter(row => row[0] >= start && row[0] <= last &&
+      indices.every(i => Number.isFinite(row[i])));
+    const points = sample.length === horizon.years * 12
+      ? calculate(sample.map(row => indices.map(i => row[i])), indices.length).frontier : [];
+    return { ...horizon, start, last, months: sample.length, points };
+  });
+}
+
+function drawHorizonChart() {
+  const available = horizonCurves.filter(curve => curve.points.length);
+  if (!available.length) return;
+  const axes = chartAxes(el("horizon-chart"), available.flatMap(curve => curve.points));
+  if (!axes) return;
+  for (const curve of available) strokeFrontier(axes, curve.points, curve.color, curve.dash);
+}
+
+function renderHorizons(chosen, indices) {
+  const key = chosen.join(",");
+  if (key === previousHorizonAssets) return;
+  previousHorizonAssets = key;
+  horizonCurves = chosen.length >= 2 ? buildHorizonCurves(data, indices) : [];
+  const legend = el("horizon-legend");
+  legend.replaceChildren();
+  for (const curve of horizonCurves) {
+    const item = document.createElement("li");
+    if (curve.points.length) {
+      const swatch = document.createElement("span");
+      swatch.className = "horizon-swatch";
+      swatch.style.borderColor = curve.color;
+      swatch.style.borderTopStyle = curve.dash.length ? "dashed" : "solid";
+      swatch.setAttribute("aria-hidden", "true");
+      item.append(swatch, curve.years + "Y · " + curve.start + " to " + curve.last);
+    } else {
+      item.textContent = curve.years + "Y · unavailable (" + curve.months + " of " + curve.years * 12 + " shared months)";
+    }
+    legend.append(item);
+  }
+  const available = horizonCurves.some(curve => curve.points.length);
+  el("horizon-chart").hidden = !available;
+  el("horizon-status").textContent = chosen.length < 2 ? "Select at least two assets to compare frontiers."
+    : available ? "" : "The selected assets do not share a complete lookback window.";
+  drawHorizonChart();
+}
+
+function drawChart() {
+  assetMarkers = [];
+  hideAssetTooltip();
+  if (!visible) return;
+  const { frontier, assets, labels } = visible;
+  const axes = chartAxes(el("frontier-chart"), frontier.concat(assets));
+  if (!axes) return;
+  const { ctx, x, y } = axes;
+  strokeFrontier(axes, frontier, "#245d93", []);
   const smallSample = labels.length <= 5;
   assets.forEach((p, i) => {
     const label = labels[i];
@@ -170,6 +252,7 @@ function render() {
   el("asset-count").textContent = chosen.length + " of " + totalAssets + " selected";
   el("asset-toggle").textContent = chosen.length === totalAssets ? "Clear all" : "Select all";
   const indices = chosen.map(ticker => data.assets.indexOf(ticker) + 1);
+  renderHorizons(chosen, indices);
   const sample = data.rows.filter(row => row[0] >= start && row[0] <= end &&
     indices.every(i => Number.isFinite(row[i])));
   const error = !chosen.length ? "Select at least one asset."
@@ -236,9 +319,7 @@ function updatePreset(preset) {
     const first = data.rows.find(row => selected.every(i => Number.isFinite(row[i])))[0];
     setPeriod("start", first);
   } else {
-    const date = new Date(last + "-01T00:00:00Z");
-    date.setUTCMonth(date.getUTCMonth() - Number(preset) * 12 + 1);
-    setPeriod("start", date.toISOString().slice(0, 7));
+    setPeriod("start", trailingStart(last, Number(preset)));
   }
   setPeriod("end", last);
   for (const button of document.querySelectorAll("[data-period]")) {
@@ -287,6 +368,9 @@ fetch("./monthly-returns.json").then(response => {
   chart.addEventListener("pointerdown", showAssetTooltip);
   chart.addEventListener("pointerleave", hideAssetTooltip);
   chart.addEventListener("pointercancel", hideAssetTooltip);
-  window.addEventListener("resize", drawChart);
+  window.addEventListener("resize", () => {
+    drawChart();
+    drawHorizonChart();
+  });
   render();
 }).catch(() => { el("sample-info").textContent = "Monthly returns could not be loaded. Reload the page to try again."; });

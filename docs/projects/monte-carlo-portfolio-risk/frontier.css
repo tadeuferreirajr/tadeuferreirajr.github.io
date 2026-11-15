@@ -43,3 +43,12 @@ input[type=month]{padding:5px;border:1px solid var(--line);color:var(--ink);back
 .asset-tooltip{position:absolute;max-width:100%;pointer-events:none;z-index:1;background:var(--navy);color:white;padding:8px 10px;box-shadow:0 2px 7px #142d4a40;font-size:12px;line-height:1.4}
 .asset-tooltip div+div{margin-top:6px;padding-top:5px;border-top:1px solid #ffffff55}
 .asset-tooltip strong,.asset-tooltip span{display:block}
+
+.horizon-section{border-top:1px solid var(--line);padding:18px 22px}
+.horizon-section h2{font-size:24px}
+#horizon-chart{height:320px}
+#horizon-chart[hidden]{display:none}
+.horizon-legend{display:flex;flex-wrap:wrap;gap:6px 16px;list-style:none;padding:0;margin:8px 0 0;color:var(--muted);font-size:12px}
+.horizon-legend li{display:flex;align-items:center;gap:5px}
+.horizon-swatch{display:inline-block;width:19px;border-top:3px solid}
+@media(max-width:620px){.horizon-section{padding:12px}#horizon-chart{height:255px}}
