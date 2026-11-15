@@ -3,10 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="An educational Monte Carlo project on sector correlations and portfolio risk.">
-<title>Monte Carlo Portfolio Risk | Tadeu Ferreira</title>
+<meta name="description" content="An interactive educational portfolio construction tool using historical monthly returns.">
+<title>Portfolio Construction | Tadeu Ferreira</title>
 <link rel="stylesheet" href="/style.css">
 
+<link rel="stylesheet" href="./frontier.css">
+<script src="./frontier.js" defer></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -14,15 +16,49 @@
 <a class="brand" href="/"><span class="mark" aria-hidden="true">TF</span><span>Tadeu Ferreira</span></a>
 <div class="navlinks"><a href="/">Home</a><a href="/projects/" aria-current="page">Projects</a><a href="/about/">About</a><a class="social" href="https://www.linkedin.com/in/tadeuferreiradesousajunior/">LinkedIn <span aria-hidden="true">→</span></a></div>
 </nav></header>
-<main id="main"><section class="wrap page-intro project-intro">
+<main id="main">
+<section class="wrap page-intro project-intro">
 <a class="back" href="/projects/">← All projects</a>
-<p class="kicker">Quantitative Finance · In development</p>
-<h1>What Happens to Diversification in a Crisis?</h1>
-<p class="intro">How does a shift in correlations change the modeled losses of a hypothetical equity portfolio when sector volatilities and portfolio weights are held fixed?</p></section>
-<section class="wrap about-grid"><div>
-<div class="entry"><h2>First feature: Historical sector returns</h2><p>The first step is to load daily returns for three US equity sectors, align the series by date, and plot their cumulative returns from a common starting value of 100.</p></div>
-<div class="entry"><h2>Data source</h2><p>The project will use historical sector returns from the <a href="https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_library.html">Kenneth R. French Data Library</a>. The portfolio weights and simulated scenarios will be hypothetical.</p></div>
-</div></section></main>
-<footer><div class="wrap"><span>© 2026 Tadeu Ferreira</span><span class="foot-note">Personal portfolio · Educational demonstrations</span><a href="/disclosure/">Disclosure</a></div></footer>
+<p class="kicker">Quantitative Finance · Educational demo</p>
+<h1>Portfolio Construction</h1>
+<p class="intro">Explore the historical trade-off between return and volatility for combinations of US stocks and gold.</p>
+</section>
+<section class="wrap project" aria-label="Portfolio inputs and results">
+<div class="frontier-filters">
+<fieldset id="frontier-controls" disabled>
+<legend>Choose assets and a period</legend>
+<div class="frontier-fields">
+<div class="asset-options" role="group" aria-label="Assets">
+<label><input type="checkbox" name="asset" value="VTI" checked> VTI <small>US equities</small></label>
+<label><input type="checkbox" name="asset" value="GLD" checked> GLD <small>Gold</small></label>
+</div>
+<label for="start-month">From <input type="month" id="start-month"></label>
+<label for="end-month">To <input type="month" id="end-month"></label>
+</div>
+</fieldset>
+<p id="sample-info" aria-live="polite">Loading monthly returns…</p>
+</div>
+<div id="frontier-output" hidden>
+<div class="frontier-results">
+<div class="chart-box">
+<div class="chart-head"><strong id="frontier-heading">Efficient frontier</strong><span>ANNUALIZED RETURN (%)</span></div>
+<canvas id="frontier-chart" role="img" aria-label="Annualized historical return plotted against annualized volatility. Key points are in the adjacent table."></canvas>
+<p class="chart-key">Blue line: efficient portfolios. Blue dot: minimum volatility. Gray dots: individual assets.</p>
+</div>
+<div class="frontier-summary">
+<p>Monthly return correlation <strong id="correlation-result"></strong></p>
+<table id="frontier-table" aria-label="Historical minimum-variance portfolio and individual asset statistics"></table>
+</div>
+</div>
+</div>
+<details open><summary>How the model works</summary>
+<p><strong>Data.</strong> We use the last available adjusted close in each completed calendar month. Each monthly return is the current month-end close divided by the previous month-end close, minus one. The sample uses only months with returns for all selected assets. Source: Yahoo Finance, adjusted closes in USD. <a href="./monthly-returns.csv">Download monthly returns (CSV)</a>.</p>
+<p><strong>Example.</strong> The first shared observation is December 2004. For each fund, divide its December month-end close by its November month-end close and subtract one.</p>
+<p><strong>Annualization.</strong> We multiply the sample mean monthly return by 12 and the sample covariance matrix by 12. Portfolio volatility is the square root of the weighted annualized covariance. The return is an arithmetic estimate, distinct from a compounded annual return (CAGR).</p>
+<p><strong>Frontier.</strong> Weights add to 100% and are constrained to be nonnegative. The curve begins at the minimum-variance portfolio and ends at the allocation with the highest sample mean return. The assumed weights are constant each month. The model excludes trading costs and taxes. Results describe the selected historical sample and are provided for education.</p>
+</details>
+</section>
+<div class="wrap project-bottom"><a href="/disclosure/">Educational use disclosure</a><a href="https://github.com/tadeuferreirajr/tadeuferreirajr.github.io/blob/main/scripts/build_monthly_returns.py">View the Python data preparation script →</a></div>
+</main><footer><div class="wrap"><span>© 2026 Tadeu Ferreira</span><span class="foot-note">Personal portfolio · Educational demonstrations</span><a href="/disclosure/">Disclosure</a></div></footer>
 </body>
 </html>
