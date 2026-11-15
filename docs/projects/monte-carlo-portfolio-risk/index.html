@@ -21,19 +21,38 @@
 <a class="back" href="/projects/">← All projects</a>
 <p class="kicker">Quantitative Finance · Educational demo</p>
 <h1>Portfolio Construction</h1>
-<p class="intro">Explore the historical trade-off between return and volatility for combinations of US stocks and gold.</p>
+<p class="intro">Explore the historical trade-off between return and volatility for combinations of the broad U.S. stock market, gold, and all 11 U.S. equity sectors.</p>
 </section>
 <section class="wrap project" aria-label="Portfolio inputs and results">
 <div class="frontier-filters">
 <fieldset id="frontier-controls" disabled>
 <legend>Choose assets and a period</legend>
 <div class="frontier-fields">
-<div class="asset-options" role="group" aria-label="Assets">
+<div class="period-pickers">
+<div class="period-presets" role="group" aria-label="Quick date ranges">
+<button type="button" data-period="1" aria-pressed="false">1Y</button><button type="button" data-period="3" aria-pressed="false">3Y</button><button type="button" data-period="5" aria-pressed="false">5Y</button><button type="button" data-period="10" aria-pressed="false">10Y</button><button type="button" data-period="max" id="period-max" aria-pressed="false">Max</button>
+</div>
+<div class="period-manual">
+<div class="period-side" role="group" aria-label="From"><span>From</span><select id="start-month" aria-label="From month"></select><select id="start-year" aria-label="From year"></select></div><div class="period-side" role="group" aria-label="To"><span>To</span><select id="end-month" aria-label="To month"></select><select id="end-year" aria-label="To year"></select></div>
+</div></div>
+<div class="asset-options" role="group" aria-label="Broad market and gold">
 <label><input type="checkbox" name="asset" value="VTI" checked> VTI <small>US equities</small></label>
 <label><input type="checkbox" name="asset" value="GLD" checked> GLD <small>Gold</small></label>
 </div>
-<label for="start-month">From <input type="month" id="start-month"></label>
-<label for="end-month">To <input type="month" id="end-month"></label>
+<div class="sector-heading"><strong>U.S. equity sectors</strong><button id="sector-toggle" type="button">Select all sectors</button></div>
+<div class="asset-options sector-grid" id="sector-options" role="group" aria-label="S&P 500 equity sectors">
+<label><input type="checkbox" name="asset" value="XLB"> <span><strong>XLB</strong><small>Materials</small></span></label>
+<label><input type="checkbox" name="asset" value="XLC"> <span><strong>XLC</strong><small>Communication Services</small></span></label>
+<label><input type="checkbox" name="asset" value="XLE"> <span><strong>XLE</strong><small>Energy</small></span></label>
+<label><input type="checkbox" name="asset" value="XLF"> <span><strong>XLF</strong><small>Financials</small></span></label>
+<label><input type="checkbox" name="asset" value="XLI"> <span><strong>XLI</strong><small>Industrials</small></span></label>
+<label><input type="checkbox" name="asset" value="XLK"> <span><strong>XLK</strong><small>Technology</small></span></label>
+<label><input type="checkbox" name="asset" value="XLP"> <span><strong>XLP</strong><small>Consumer Staples</small></span></label>
+<label><input type="checkbox" name="asset" value="XLRE"> <span><strong>XLRE</strong><small>Real Estate</small></span></label>
+<label><input type="checkbox" name="asset" value="XLU"> <span><strong>XLU</strong><small>Utilities</small></span></label>
+<label><input type="checkbox" name="asset" value="XLV"> <span><strong>XLV</strong><small>Health Care</small></span></label>
+<label><input type="checkbox" name="asset" value="XLY"> <span><strong>XLY</strong><small>Consumer Discretionary</small></span></label>
+</div>
 </div>
 </fieldset>
 <p id="sample-info" aria-live="polite">Loading monthly returns…</p>
@@ -46,8 +65,10 @@
 <p class="chart-key">Blue line: efficient portfolios. Blue dot: minimum volatility. Gray dots: individual assets.</p>
 </div>
 <div class="frontier-summary">
-<p>Monthly return correlation <strong id="correlation-result"></strong></p>
+<p id="correlation-row">Monthly return correlation <strong id="correlation-result"></strong></p>
 <table id="frontier-table" aria-label="Historical minimum-variance portfolio and individual asset statistics"></table>
+<h3>Minimum-variance weights</h3><dl id="portfolio-weights"></dl>
+<details class="individual-results"><summary>Individual asset statistics</summary><table id="individual-table" aria-label="Individual asset statistics"></table></details>
 </div>
 </div>
 </div>
@@ -55,7 +76,7 @@
 <p><strong>Data.</strong> We use the last available adjusted close in each completed calendar month. Each monthly return is the current month-end close divided by the previous month-end close, minus one. The sample uses only months with returns for all selected assets. Source: Yahoo Finance, adjusted closes in USD. <a href="./monthly-returns.csv">Download monthly returns (CSV)</a>.</p>
 <p><strong>Example.</strong> The first shared observation is December 2004. For each fund, divide its December month-end close by its November month-end close and subtract one.</p>
 <p><strong>Annualization.</strong> We multiply the sample mean monthly return by 12 and the sample covariance matrix by 12. Portfolio volatility is the square root of the weighted annualized covariance. The return is an arithmetic estimate, distinct from a compounded annual return (CAGR).</p>
-<p><strong>Frontier.</strong> Weights add to 100% and are constrained to be nonnegative. The curve begins at the minimum-variance portfolio and ends at the allocation with the highest sample mean return. The assumed weights are constant each month. The model excludes trading costs and taxes. Results describe the selected historical sample and are provided for education.</p>
+<p><strong>Frontier.</strong> Weights add to 100% and are constrained to be nonnegative. The curve traces long-only portfolios from minimum variance to maximum sample mean return. For each point, the optimizer trades off sample variance against sample mean return. The assumed weights are constant each month. The model excludes trading costs and taxes. Results describe the selected historical sample and are provided for education.</p>
 </details>
 </section>
 <div class="wrap project-bottom"><a href="/disclosure/">Educational use disclosure</a><a href="https://github.com/tadeuferreirajr/tadeuferreirajr.github.io/blob/main/scripts/build_monthly_returns.py">View the Python data preparation script →</a></div>

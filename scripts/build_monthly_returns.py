@@ -5,13 +5,15 @@ from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-TICKERS = ("VTI", "GLD")
+TICKERS = ("VTI", "GLD", "XLB", "XLC", "XLE", "XLF", "XLI", "XLK", "XLP", "XLRE", "XLU", "XLV", "XLY")
 DATA = ROOT / "data" / "portfolio-construction"
 OUTPUT = ROOT / "docs" / "projects" / "monte-carlo-portfolio-risk"
 
 
 def read_prices(ticker):
-    with (DATA / f"{ticker}.csv").open(newline="") as file:
+    daily = DATA / f"{ticker}.csv"
+    source = daily if daily.exists() else DATA / "month-end" / daily.name
+    with source.open(newline="") as file:
         return {
             date.fromisoformat(row["date"]): float(row["adjusted_close"])
             for row in csv.DictReader(file)
@@ -37,7 +39,7 @@ def monthly_returns(prices, cutoff):
 
 if __name__ == "__main__":
     prices = {ticker: read_prices(ticker) for ticker in TICKERS}
-    cutoff = min(max(series) for series in prices.values()).isoformat()[:7]
+    cutoff = min(max(prices[ticker]) for ticker in ("VTI", "GLD")).isoformat()[:7]
     returns = {ticker: monthly_returns(series, cutoff) for ticker, series in prices.items()}
     months = sorted(set().union(*(series.keys() for series in returns.values())))
     OUTPUT.mkdir(parents=True, exist_ok=True)
