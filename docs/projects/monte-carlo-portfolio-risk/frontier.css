@@ -17,20 +17,29 @@ input[type=month]{padding:5px;border:1px solid var(--line);color:var(--ink);back
 @media(max-width:800px){.frontier-results{grid-template-columns:1fr}}
 @media(max-width:620px){.frontier-results,.frontier-filters{padding:12px}}
 .frontier-fields{display:grid;gap:12px}
-.period-pickers,.period-manual,.period-presets,.period-side,.sector-heading{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.period-pickers,.period-manual,.period-presets,.period-side,.asset-heading{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .period-pickers{gap:14px}
 .period-manual{gap:13px}
 .period-side{font-size:13px}
 .frontier-fields button,.frontier-fields select{width:auto;padding:5px 8px;background:white;color:var(--navy);border:1px solid var(--line);font:inherit;font-size:13px}
 .frontier-fields button{cursor:pointer}
 .period-presets button[aria-pressed=true]{background:var(--navy);color:white;border-color:var(--navy)}
-.sector-heading{justify-content:space-between}
-.sector-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr))}
-.sector-grid label{display:flex;gap:5px;align-items:center;cursor:pointer}
-.sector-grid small{display:block}
+.asset-heading{justify-content:space-between}
+.asset-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr))}
+.asset-grid label{display:flex;gap:5px;align-items:center;cursor:pointer}
+.asset-grid small{display:block}
 .frontier-summary [hidden]{display:none}
 .frontier-summary h3{font-size:14px;margin-top:12px}
 #portfolio-weights{display:grid;grid-template-columns:1fr auto;gap:4px 12px;margin:8px 0;font-size:13px}
 #portfolio-weights dd{margin:0;font-variant-numeric:tabular-nums}
 .individual-results{padding:8px 0 0;margin-top:10px}
 .frontier-results .chart-box{align-self:start}
+
+#asset-count{color:var(--muted);font-size:13px;margin-left:6px}
+.asset-grid label{min-height:46px}
+.asset-grid label:has(input:checked){background:var(--wash);border-color:#86aacf}
+.asset-grid label:focus-within{outline:2px solid var(--blue);outline-offset:2px}
+.frontier-plot{position:relative}
+.asset-tooltip{position:absolute;max-width:100%;pointer-events:none;z-index:1;background:var(--navy);color:white;padding:8px 10px;box-shadow:0 2px 7px #142d4a40;font-size:12px;line-height:1.4}
+.asset-tooltip div+div{margin-top:6px;padding-top:5px;border-top:1px solid #ffffff55}
+.asset-tooltip strong,.asset-tooltip span{display:block}

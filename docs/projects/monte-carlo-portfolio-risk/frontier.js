@@ -66,8 +66,51 @@ const el = (id) => document.getElementById(id);
 const percent = (x) => (x * 100).toFixed(2) + "%";
 let data;
 let visible;
+let assetMarkers = [];
+
+function assetsAt(x, y) {
+  const nearby = assetMarkers.map(marker => ({
+    marker, distance: Math.hypot(marker.x - x, marker.y - y),
+  })).filter(item => item.distance <= 12).sort((a, b) => a.distance - b.distance);
+  if (!nearby.length) return [];
+  const closest = nearby[0].marker;
+  return nearby.filter(({ marker }) =>
+    Math.hypot(marker.x - closest.x, marker.y - closest.y) <= 5).map(item => item.marker);
+}
+
+function hideAssetTooltip() {
+  el("asset-tooltip").hidden = true;
+  el("frontier-chart").style.cursor = "";
+}
+
+function showAssetTooltip(event) {
+  const chart = el("frontier-chart");
+  const bounds = chart.getBoundingClientRect();
+  const x = event.clientX - bounds.left, y = event.clientY - bounds.top;
+  const markers = assetsAt(x, y);
+  if (!markers.length) { hideAssetTooltip(); return; }
+  const tooltip = el("asset-tooltip");
+  tooltip.replaceChildren();
+  for (const marker of markers) {
+    const group = document.createElement("div");
+    const title = document.createElement("strong");
+    const metrics = document.createElement("span");
+    title.textContent = marker.label + " · " + marker.name;
+    metrics.textContent = "Return " + percent(marker.return) + "  |  Volatility " + percent(marker.risk);
+    group.append(title, metrics);
+    tooltip.append(group);
+  }
+  tooltip.hidden = false;
+  const left = x + 14 + tooltip.offsetWidth <= chart.clientWidth
+    ? x + 14 : Math.max(0, x - tooltip.offsetWidth - 14);
+  tooltip.style.left = left + "px";
+  tooltip.style.top = Math.max(0, Math.min(y + 12, chart.clientHeight - tooltip.offsetHeight)) + "px";
+  chart.style.cursor = "pointer";
+}
 
 function drawChart() {
+  assetMarkers = [];
+  hideAssetTooltip();
   if (!visible) return;
   const { frontier, assets, labels } = visible;
   const chart = el("frontier-chart");
@@ -108,6 +151,9 @@ function drawChart() {
   ctx.stroke();
   const smallSample = labels.length <= 5;
   assets.forEach((p, i) => {
+    const label = labels[i];
+    const name = document.querySelector('input[value="' + label + '"] + span small').textContent;
+    assetMarkers.push({ ...p, label, name, x: x(p.risk), y: y(p.return) });
     ctx.fillStyle = "#4b627a";
     ctx.beginPath(); ctx.arc(x(p.risk), y(p.return), 4, 0, 2 * Math.PI); ctx.fill();
     if (smallSample) ctx.fillText(labels[i], x(p.risk) - 18, y(p.return) - 8);
@@ -120,8 +166,9 @@ function drawChart() {
 function render() {
   const start = getPeriod("start"), end = getPeriod("end");
   const chosen = [...document.querySelectorAll("input[name=asset]:checked")].map(input => input.value);
-  const allSectors = [...document.querySelectorAll("#sector-options input")].every(input => input.checked);
-  el("sector-toggle").textContent = allSectors ? "Clear sectors" : "Select all sectors";
+  const totalAssets = document.querySelectorAll("#asset-options input").length;
+  el("asset-count").textContent = chosen.length + " of " + totalAssets + " selected";
+  el("asset-toggle").textContent = chosen.length === totalAssets ? "Clear all" : "Select all";
   const indices = chosen.map(ticker => data.assets.indexOf(ticker) + 1);
   const sample = data.rows.filter(row => row[0] >= start && row[0] <= end &&
     indices.every(i => Number.isFinite(row[i])));
@@ -131,7 +178,7 @@ function render() {
   el("frontier-output").hidden = Boolean(error);
   el("sample-info").textContent = error || sample.length + " monthly observations · " +
     sample[0][0] + " to " + sample.at(-1)[0];
-  if (error) { visible = undefined; return; }
+  if (error) { visible = undefined; drawChart(); return; }
   visible = { ...calculate(sample.map(row => indices.map(i => row[i])), chosen.length), labels: chosen };
   el("frontier-heading").textContent = chosen.length >= 2 ? "Efficient frontier" : "Single-asset result";
   el("correlation-row").hidden = chosen.length !== 2;
@@ -227,14 +274,19 @@ fetch("./monthly-returns.json").then(response => {
     updatePreset(button.dataset.period);
     render();
   });
-  el("sector-toggle").addEventListener("click", () => {
-    const boxes = [...document.querySelectorAll("#sector-options input")];
+  el("asset-toggle").addEventListener("click", () => {
+    const boxes = [...document.querySelectorAll("#asset-options input")];
     const selectAll = boxes.some(box => !box.checked);
     boxes.forEach(box => { box.checked = selectAll; });
     if (el("period-max").getAttribute("aria-pressed") === "true") updatePreset("max");
     render();
   });
   updatePreset("max");
+  const chart = el("frontier-chart");
+  chart.addEventListener("pointermove", showAssetTooltip);
+  chart.addEventListener("pointerdown", showAssetTooltip);
+  chart.addEventListener("pointerleave", hideAssetTooltip);
+  chart.addEventListener("pointercancel", hideAssetTooltip);
   window.addEventListener("resize", drawChart);
   render();
 }).catch(() => { el("sample-info").textContent = "Monthly returns could not be loaded. Reload the page to try again."; });
