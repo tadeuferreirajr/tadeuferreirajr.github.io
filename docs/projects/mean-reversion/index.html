@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Explore how a sample rule responds to changes in its parameters and costs on a synthetic price series.">
+<title>Mean Reversion Simulation | Tadeu Ferreira</title>
+<link rel="stylesheet" href="/style.css">
+<script src="/lab.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><nav class="wrap nav" aria-label="Main navigation">
+<a class="brand" href="/"><span class="mark" aria-hidden="true">TF</span><span>Tadeu Ferreira</span></a>
+<div class="navlinks"><a href="/">Home</a><a href="/projects/" aria-current="page">Projects</a><a href="/about/">About</a><a class="social" href="https://www.linkedin.com/in/tadeuferreiradesousajunior/">LinkedIn <span aria-hidden="true">→</span></a></div>
+</nav></header>
+<main id="main"><section class="wrap page-intro project-intro"><a class="back" href="/projects/">← All projects</a>
+<p class="kicker">Quantitative Finance · Educational demo</p><h1>Mean Reversion Simulation</h1>
+<p class="intro">Explore how a sample rule responds to changes in its parameters and costs on a synthetic price series.</p></section><section class="project wrap" aria-label="Interactive demonstration">
+    <div class="project-head"><div><h2>Interactive model</h2></div><span class="chip">Synthetic prices</span></div>
+    <div class="project-body"><div class="controls">
+      <div class="field"><label for="lookback">Lookback window</label><select id="lookback"><option value="10">10 sessions</option><option value="20" selected>20 sessions</option><option value="40">40 sessions</option></select></div>
+      <div class="field"><label for="threshold">Entry z-score <output id="threshold-value"></output></label><input id="threshold" type="range" min=".5" max="3" step=".1" value="1.5"></div>
+      <div class="field"><label for="cost">Cost per trade side <output id="cost-value"></output></label><input id="cost" type="range" min="0" max="50" step="1" value="5"></div>
+      <div class="metrics" aria-live="polite"><div><span>Simulated rule return</span><strong id="strategy-return"></strong></div><div><span>Simulated benchmark return</span><strong id="benchmark-return"></strong></div><div><span>Simulated max drawdown</span><strong id="max-dd"></strong></div><div><span>Entries</span><strong id="trades"></strong></div></div>
+    </div><div class="chart-box"><div class="chart-head"><strong>Growth of 100</strong><span>INDEXED VALUE</span></div><canvas id="quant-chart" role="img" aria-label="Indexed paths for the sample rule and simulated benchmark"></canvas><div class="legend"><span>Simulated benchmark</span><span>Sample rule</span></div></div></div>
+    <details><summary>Methodology and assumptions</summary><p>A fixed seed generates 756 simulated closes with a drifting trend and a mean-reverting component. The z-score compares each close to the mean and standard deviation of the trailing closes, including the signal day. The simulation opens a hypothetical position at the next close after the z-score falls to or below the threshold and closes it at the next close after the z-score reaches or exceeds zero. Both series start at session 41 after a common warm-up and both include the selected cost per trade side. Any open positions are closed at the final observation. Cash earns zero. The simulation illustrates how the rule behaves under its assumptions.</p></details>
+  </section><div class="wrap project-bottom"><a class="action" href="/projects/">Browse all projects →</a><a href="/disclosure/">Educational use disclosure</a></div></main>
+<footer><div class="wrap"><span>© 2026 Tadeu Ferreira</span><span class="foot-note">Personal portfolio · Educational demonstrations</span><a href="/disclosure/">Disclosure</a></div></footer>
+</body>
+</html>

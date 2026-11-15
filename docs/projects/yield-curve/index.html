@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Compare the modeled price response of two hypothetical bonds under different yield curve shocks.">
+<title>Yield Curve Scenario Lab | Tadeu Ferreira</title>
+<link rel="stylesheet" href="/style.css">
+<script src="/lab.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><nav class="wrap nav" aria-label="Main navigation">
+<a class="brand" href="/"><span class="mark" aria-hidden="true">TF</span><span>Tadeu Ferreira</span></a>
+<div class="navlinks"><a href="/">Home</a><a href="/projects/" aria-current="page">Projects</a><a href="/about/">About</a><a class="social" href="https://www.linkedin.com/in/tadeuferreiradesousajunior/">LinkedIn <span aria-hidden="true">→</span></a></div>
+</nav></header>
+<main id="main"><section class="wrap page-intro project-intro"><a class="back" href="/projects/">← All projects</a>
+<p class="kicker">Macro &amp; Fixed Income · Educational demo</p><h1>Yield Curve Scenario Lab</h1>
+<p class="intro">Compare the modeled price response of two hypothetical bonds under different yield curve shocks.</p></section><section class="project wrap" aria-label="Interactive demonstration">
+    <div class="project-head"><div><h2>Interactive model</h2></div><span class="chip">Illustrative yields</span></div>
+    <div class="project-body">
+      <div class="controls">
+        <div class="field"><label for="scenario">Curve scenario</label><select id="scenario"><option value="parallel">Parallel shift</option><option value="steep">Bear steepener</option><option value="front">Front-end selloff</option></select></div>
+        <div class="field"><label for="shock">Shock size <output id="shock-value"></output></label><input id="shock" type="range" min="-150" max="150" step="5" value="50"></div>
+        <div class="metrics" aria-live="polite"><div><span>2Y price impact</span><strong id="bond-2"></strong></div><div><span>10Y price impact</span><strong id="bond-10"></strong></div></div>
+      </div>
+      <div class="chart-box"><div class="chart-head"><strong>Hypothetical yields by maturity</strong><span>YIELD (%)</span></div><canvas id="macro-chart" role="img" aria-label="Baseline and shocked hypothetical yield curves"></canvas><div class="legend"><span>Baseline</span><span>Scenario</span></div></div>
+    </div>
+    <details><summary>Methodology and assumptions</summary><p>Exact price change for hypothetical 2-year and 10-year par bonds with annual coupons fixed at their baseline yields. The model discounts cash flows at each bond’s new yield to maturity. The steepener applies more of the shock to longer maturities, while the front-end scenario concentrates it at shorter maturities. Negative shocks reverse the selected move. The example isolates the immediate price effect of the change in yields.</p></details>
+  </section><div class="wrap project-bottom"><a class="action" href="/projects/">Browse all projects →</a><a href="/disclosure/">Educational use disclosure</a></div></main>
+<footer><div class="wrap"><span>© 2026 Tadeu Ferreira</span><span class="foot-note">Personal portfolio · Educational demonstrations</span><a href="/disclosure/">Disclosure</a></div></footer>
+</body>
+</html>
